@@ -7,6 +7,7 @@ echo xdebug.var_display_max_children=128; \
 echo xdebug.var_display_max_data=1024; \
 echo xdebug.var_display_max_depth=15; \
 echo max_input_vars = 10000; \
+echo extension=mcrypt.so; \
 } >> /usr/local/etc/php/php.ini \
 && pecl install redis-5.3.7 \
 && docker-php-ext-enable redis \
@@ -33,6 +34,8 @@ echo "deb http://mirrors.tuna.tsinghua.edu.cn/debian-security buster/updates mai
 && docker-php-ext-install pcntl \
 && docker-php-ext-install sockets \
 && docker-php-ext-install bcmath \
+&& docker-php-ext-install exif \
+&& pecl install mcrypt-1.0.6 \
 && pecl install event-3.0.8 \
 && docker-php-ext-enable event \
 && docker-php-ext-configure gd --with-freetype-dir=/usr/include/freetype2 --with-jpeg-dir=/usr/include --with-png-dir=/usr/include \
