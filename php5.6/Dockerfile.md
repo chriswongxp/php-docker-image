@@ -33,7 +33,8 @@ RUN docker-php-ext-install ldap \\<br>
 && docker-php-ext-install mysqli \\<br>
 && docker-php-ext-install zip \\<br>
 && docker-php-ext-install intl \\<br>
-&& docker-php-ext-install bcmath
+&& docker-php-ext-install bcmath \\<br>
+&& docker-php-ext-install exif
 
 RUN docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ --with-png-dir=/usr/include/ \\<br>
 && docker-php-ext-install -j$(nproc) gd \\<br>
