@@ -2,7 +2,7 @@
 docker network create -d bridge --gateway=172.18.0.1 --subnet=172.18.2.0/16 static
 
 # Run container example:
-docker run -d -e TZ="Asia/Shanghai" --name php7.2 --restart=always --network=static --ip 172.18.2.2 -p 8301-8310:8301-8310 -p 8401-8410:8401-8410 -v /srv/http/php:/var/www/html chriswongxp/php7.2
+docker run -d -e TZ="Asia/Shanghai" --name php7.2 --restart=always --network=static --ip 172.18.2.2 -v /srv/http/php:/var/www/html chriswongxp/php7.2
 
 # Dockerfile:
 FROM php:7.2-fpm
