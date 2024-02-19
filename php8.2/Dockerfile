@@ -23,7 +23,7 @@ RUN docker-php-ext-install sockets \
 && pecl install xdebug \
 && docker-php-ext-enable redis \
 && docker-php-ext-enable xdebug \
-&& docker-php-ext-enable event \
+&& docker-php-ext-enable --ini-name zz-event.ini event \
 && rm -rf /tmp/pear
 
 # 修改php配置文件
