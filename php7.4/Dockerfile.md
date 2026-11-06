@@ -1,7 +1,16 @@
 # Create static network example:
 docker network create -d bridge --gateway=172.18.0.1 --subnet=172.18.2.0/16 static
 
-# Run container example:
+# 镜像分发（阿里云 ACR，固定地址，公开仓库免登录拉取）
+
+registry 地址（实例 ID+地域，开通后不变，无需再登阿里云后台查询）：
+crpi-6sveuztmrd6gt9gg.cn-chengdu.personal.cr.aliyuncs.com
+
+其他服务器部署（直接用长名，不做 tag 短名）：
+docker pull crpi-6sveuztmrd6gt9gg.cn-chengdu.personal.cr.aliyuncs.com/chriswongxp/php7.4:latest
+docker run -d -e TZ="Asia/Shanghai" --name php7.4 --restart=always --network=static --ip 172.18.2.1 -v /srv/http/php:/var/www/html crpi-6sveuztmrd6gt9gg.cn-chengdu.personal.cr.aliyuncs.com/chriswongxp/php7.4:latest
+
+# Run container example（本机构建运行）:
 docker run -d -e TZ="Asia/Shanghai" --name php7.4 --restart=always --network=static --ip 172.18.2.1 -v /srv/http/php:/var/www/html chriswongxp/php7.4
 
 # Dockerfile:
