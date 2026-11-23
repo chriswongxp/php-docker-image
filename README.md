@@ -21,6 +21,13 @@ docker tag chriswongxp/php8.5:latest crpi-6sveuztmrd6gt9gg.cn-chengdu.personal.c
 docker push crpi-6sveuztmrd6gt9gg.cn-chengdu.personal.cr.aliyuncs.com/chriswongxp/php8.5:latest
 ```
 
+### php8.3
+
+```
+docker tag chriswongxp/php8.3:latest crpi-6sveuztmrd6gt9gg.cn-chengdu.personal.cr.aliyuncs.com/chriswongxp/php8.3:latest
+docker push crpi-6sveuztmrd6gt9gg.cn-chengdu.personal.cr.aliyuncs.com/chriswongxp/php8.3:latest
+```
+
 ### php7.4
 
 ```
