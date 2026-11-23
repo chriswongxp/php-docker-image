@@ -45,9 +45,10 @@ RUN yum install -y --setopt=tsflags=nodocs \
     iproute telnet bind-utils curl net-tools \
 && yum clean all
 
-# ---- 用户对齐宿主机 /srv/http/php 属主 1000:982，容器内同名 www-data ----
-RUN groupmod -g 982 users \
-&& useradd -u 1000 -g 982 -M -s /sbin/nologin www-data
+# ---- www-data（不钉死 UID，自动分配）----
+# 运行时写入面只有 tmp/（上传走 Java、session 在 redis），新机器部署时若 Smarty 编译报
+# Permission denied，删掉 tmp/templates_c、tmp/logs 让 worker 重建即可，无需对齐历史 UID
+RUN useradd -M -s /sbin/nologin www-data
 
 # ---- php.ini 对齐 php5.3（redis / timezonedb / max_input_vars / 时区；default_charset 置空保持 5.3 行为）----
 WORKDIR /opt/remi/php54/root/etc
@@ -61,7 +62,7 @@ RUN sed -i '$a extension=redis.so' php.ini \
 # ---- php-fpm 对齐 php5.3（0.0.0.0:9000 / www-data / dynamic pm）----
 RUN sed -i 's/^user = apache/user = www-data/' php-fpm.d/www.conf \
 && sed -i 's/^listen.allowed_clients =.*/;listen.allowed_clients =/' php-fpm.d/www.conf \
-&& sed -i 's/^group = apache/group = users/' php-fpm.d/www.conf \
+&& sed -i 's/^group = apache/group = www-data/' php-fpm.d/www.conf \
 && sed -i 's|^listen = .*|listen = 0.0.0.0:9000|' php-fpm.d/www.conf \
 && sed -i 's/^pm.max_children =.*/pm.max_children = 8/' php-fpm.d/www.conf \
 && sed -i 's/^pm.start_servers =.*/pm.start_servers = 2/' php-fpm.d/www.conf \

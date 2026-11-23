@@ -24,7 +24,7 @@ docker run -d -e TZ="Asia/Shanghai" --name php5.4 --restart=always --network=sta
 - timezonedb-2015.6 pecl 源码编译（同版本）
 - php.ini：max_input_vars = 10000、date.timezone = Asia/Shanghai（5.4 不认 PRC，见坑）、default_charset 置空（保持 5.3 行为，htmlspecialchars 默认 ISO-8859-1 与 5.3 逐字节一致）
 - OPcache 禁用（remi 的 pecl-zendopcache 的 opcache.ini 已删，对齐 php5.3 无 OPcache）
-- php-fpm：user www-data(1000) group users(982)，对齐宿主机 /srv/http/php 属主，避免挂载目录权限问题；pm dynamic 8/2/1/3、pm.status_path=/fpm-status（同 php5.3）
+- php-fpm：user/group www-data（UID 自动分配，不钉死）。运行时写入面只有 tmp/（上传走 Java、session 在 redis），新机器部署若 Smarty 编译报 Permission denied，删 tmp/templates_c、tmp/logs 让 worker 重建即可；pm dynamic 8/2/1/3、pm.status_path=/fpm-status（同 php5.3）
 - 扩展与 php5.3 的 diff：仅缺 SQLite(v2)（remi 未打包 ext/sqlite 旧接口；业务 dbdriver=mysql，sqlite_* 仅第三方库可选驱动：lotusphp/PExcel缓存后端/CI2 sqlite 驱动，实际不走）。多出 calendar/gmp/mhash/mysqlnd/pcntl/readline/shmop/sysv*/wddx/xsl（remi 默认编译，无害）
 - 网络诊断工具：ip（iproute 包，注意 centos7 包名不是 iproute2）、telnet、nslookup（bind-utils）、curl、ping、netstat（net-tools）
 
