@@ -10,7 +10,14 @@ docker run -d -e TZ="Asia/Shanghai" --name php5.4 --restart=always --network=sta
 （--network/--ip/--volume 按各机器实际情况调整；验证三件事：php -v 是 5.4.45、date 是北京时间、nginx 机器发真实请求 200）
 
 # Run container example（本机构建运行）:
-docker run -d -e TZ="Asia/Shanghai" --name php5.4 --restart=always --network=static --ip 172.18.0.7 --log-opt max-size=100m --log-opt max-file=5 -v /srv/http/php:/var/www/html chriswongxp/php5.4
+docker run -d -e TZ="Asia/Shanghai" --name php5.4 --restart=always --network=static --ip 172.18.0.7 --log-opt max-size=100m --log-opt max-file=5 -v /srv/http/php:/var/www/html crpi-6sveuztmrd6gt9gg.cn-chengdu.personal.cr.aliyuncs.com/chriswongxp/php5.4:latest
+
+# 镜像 tag 规范
+
+- 起容器一律用长名 crpi-6sveuztmrd6gt9gg.cn-chengdu.personal.cr.aliyuncs.com/chriswongxp/php5.4:latest，短名 chriswongxp/php5.4 仅作本地别名
+- build 后必须给长名同步打 tag，否则长名停在旧镜像——踩过：只 build 短名，长名还指着改造前的镜像，用长名起容器等于功能回退
+  docker build -t chriswongxp/php5.4:latest . && docker tag chriswongxp/php5.4:latest crpi-6sveuztmrd6gt9gg.cn-chengdu.personal.cr.aliyuncs.com/chriswongxp/php5.4:latest
+- 其他机器要用得先推送：docker push crpi-6sveuztmrd6gt9gg.cn-chengdu.personal.cr.aliyuncs.com/chriswongxp/php5.4:latest
 
 # 环境说明
 
