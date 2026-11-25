@@ -70,6 +70,15 @@ RUN sed -i 's/^user = apache/user = www-data/' php-fpm.d/www.conf \
 && sed -i 's/^pm.max_spare_servers =.*/pm.max_spare_servers = 3/' php-fpm.d/www.conf \
 && printf 'pm.status_path = /fpm-status\n' >> php-fpm.d/www.conf
 
+# ---- 日志走容器 stdio，docker logs 统一收 ----
+# 目标是 /proc/self/fd/2 而非 fd/1：php-fpm 启动即 close(STDOUT)，实测 master 的
+# fd1=/dev/null、fd2=docker 日志管道，写 stdout 永远看不到（PHP bug #73886）
+# 三处缺一不可：fpm 自身日志、PHP 运行期错误、worker stderr 接管
+# （catch_workers_output 不开则 worker 的 fd2 丢进 /dev/null，前两处指向哪都白搭）
+RUN sed -i 's|^error_log = .*|error_log = /proc/self/fd/2|' php-fpm.conf \
+&& sed -i 's|^php_admin_value\[error_log\] = .*|php_admin_value[error_log] = /proc/self/fd/2|' php-fpm.d/www.conf \
+&& sed -i 's/^;catch_workers_output = yes/catch_workers_output = yes/' php-fpm.d/www.conf
+
 RUN mkdir -p /var/www/html
 
 # ---- 全局命令（remi SCL 路径不在默认 PATH，符号链接到 /usr/local/bin）----

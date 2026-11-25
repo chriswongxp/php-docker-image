@@ -5,18 +5,29 @@ crpi-6sveuztmrd6gt9gg.cn-chengdu.personal.cr.aliyuncs.com
 
 其他服务器部署（直接用长名，不做 tag 短名）：
 docker pull crpi-6sveuztmrd6gt9gg.cn-chengdu.personal.cr.aliyuncs.com/chriswongxp/php5.4:latest
-docker run -d -e TZ="Asia/Shanghai" --name php5.4 --restart=always --network=static --ip 172.18.0.7 -v /srv/http/php:/var/www/html crpi-6sveuztmrd6gt9gg.cn-chengdu.personal.cr.aliyuncs.com/chriswongxp/php5.4:latest
+docker run -d -e TZ="Asia/Shanghai" --name php5.4 --restart=always --network=static --ip 172.18.0.7 --log-opt max-size=100m --log-opt max-file=5 -v /srv/http/php:/var/www/html crpi-6sveuztmrd6gt9gg.cn-chengdu.personal.cr.aliyuncs.com/chriswongxp/php5.4:latest
 
 （--network/--ip/--volume 按各机器实际情况调整；验证三件事：php -v 是 5.4.45、date 是北京时间、nginx 机器发真实请求 200）
 
 # Run container example（本机构建运行）:
-docker run -d -e TZ="Asia/Shanghai" --name php5.4 --restart=always --network=static --ip 172.18.0.7 -v /srv/http/php:/var/www/html chriswongxp/php5.4
+docker run -d -e TZ="Asia/Shanghai" --name php5.4 --restart=always --network=static --ip 172.18.0.7 --log-opt max-size=100m --log-opt max-file=5 -v /srv/http/php:/var/www/html chriswongxp/php5.4
 
 # 环境说明
 
 - PHP 5.4.45（Remi SCL php54，centos:7 基础镜像），cli 路径 /opt/remi/php54/root/usr/bin/php，fpm 路径 /opt/remi/php54/root/usr/sbin/php-fpm，监听 0.0.0.0:9000（本机 nginx upstream fastcgi_pass）
 - 用途：购途网等 php5.3+CI2 项目升级 PHP 5.4 的本地验证环境（生产为三方商用 PHP 5.4，定制修复 PHP2Shell）
 - 配置目录：/opt/remi/php54/root/etc/php.ini、php-fpm.d/www.conf、php.d/
+
+# 日志（docker logs 统一收）
+
+- 三处缺一不可：php-fpm.conf 的 error_log（fpm 自身）、www.conf 的 php_admin_value[error_log]（PHP 运行期错误）、catch_workers_output = yes（把 worker 的 stderr 接到 master 的 error_log）
+- catch_workers_output 不开的话 worker 的 fd2 会被丢到 /dev/null，前两处指向哪都白搭——PHP 错误照样丢。日志里 `child N said into stderr:` 前缀就是它加的
+- echo/print 走 FastCGI 响应流，跟进程 fd 1 无关，本来就不进日志；catch_workers_output 接住的是 PHP 错误和扩展直接写 stderr 的内容
+- 不用 fd/1：php-fpm 启动即 close(STDOUT)，实测 master 的 fd1=/dev/null、fd2=docker 日志管道，写 stdout 永远看不到（PHP bug #73886，官方 php 镜像的 docker.conf 同样只用 fd/2）
+- php.ini 的 error_log 不用配：www.conf 的 php_admin_value[error_log] 优先级更高，会覆盖 php.ini
+- 查看：docker logs -f php5.4
+- docker run 必须带 --log-opt max-size=100m --log-opt max-file=5，否则 json-file 驱动无限增长；该参数只能在 docker run 时指定，docker update 改不了
+- 重建容器时 --ip 必须与 nginx upstream 对齐（本机 nginx.conf upstream php5.4 写死 172.18.0.3），否则 502
 
 # 与 php5.3 容器（chriswongxp/php5.3）的对齐
 
